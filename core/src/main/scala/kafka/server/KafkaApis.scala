@@ -28,6 +28,7 @@ import java.util.concurrent.atomic.AtomicInteger
 import kafka.admin.{AdminUtils, RackAwareMode}
 import kafka.api.ElectLeadersRequestOps
 import kafka.api.{ApiVersion, KAFKA_0_11_0_IV0, KAFKA_2_3_IV0}
+import kafka.audit.logging.RequestToAuditLog
 import kafka.cluster.Partition
 import kafka.common.OffsetAndMetadata
 import kafka.controller.{KafkaController, ReplicaAssignment}
@@ -1655,6 +1656,7 @@ class KafkaApis(val requestChannel: RequestChannel,
       }
       sendResponseCallback(results)
     } else {
+      RequestToAuditLog.logRequest(createTopicsRequest, request.context)
       createTopicsRequest.data.topics.asScala.foreach { case topic =>
         results.add(new CreatableTopicResult().setName(topic.name()))
       }
@@ -2197,6 +2199,7 @@ class KafkaApis(val requestChannel: RequestChannel,
   def handleCreateAcls(request: RequestChannel.Request): Unit = {
     authorizeClusterOperation(request, ALTER)
     val createAclsRequest = request.body[CreateAclsRequest]
+    RequestToAuditLog.logRequest(createAclsRequest, request.context)
 
     authorizer match {
       case None =>

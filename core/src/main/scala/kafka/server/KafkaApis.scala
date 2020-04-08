@@ -1779,6 +1779,7 @@ class KafkaApis(val requestChannel: RequestChannel,
       }
       sendResponseCallback(results)
     } else {
+      RequestToAuditLog.logRequest(deleteTopicRequest, request.context)
       deleteTopicRequest.data.topicNames.asScala.foreach { case topic =>
         results.add(new DeletableTopicResult()
           .setName(topic))
@@ -2188,6 +2189,7 @@ class KafkaApis(val requestChannel: RequestChannel,
           new DescribeAclsResponse(requestThrottleMs,
             new ApiError(Errors.SECURITY_DISABLED, "No Authorizer is configured on the broker"), util.Collections.emptySet()))
       case Some(auth) =>
+        RequestToAuditLog.logRequest(describeAclsRequest, request.context)
         val filter = describeAclsRequest.filter
         val returnedAcls = new util.HashSet[AclBinding]()
         auth.acls(filter).asScala.foreach(returnedAcls.add)
@@ -2199,15 +2201,15 @@ class KafkaApis(val requestChannel: RequestChannel,
   def handleCreateAcls(request: RequestChannel.Request): Unit = {
     authorizeClusterOperation(request, ALTER)
     val createAclsRequest = request.body[CreateAclsRequest]
-    RequestToAuditLog.logRequest(createAclsRequest, request.context)
 
     authorizer match {
       case None =>
         sendResponseMaybeThrottle(request, requestThrottleMs =>
-          createAclsRequest.getErrorResponse(requestThrottleMs,
-            new SecurityDisabledException("No Authorizer is configured on the broker.")))
+            createAclsRequest.getErrorResponse(requestThrottleMs,
+        new SecurityDisabledException("No Authorizer is configured on the broker.")))
       case Some(auth) =>
 
+        RequestToAuditLog.logRequest(createAclsRequest, request.context)
         val errorResults = mutable.Map[AclBinding, AclCreateResult]()
         val aclBindings = createAclsRequest.aclCreations.asScala.map(_.acl)
         val validBindings = aclBindings
@@ -2252,6 +2254,7 @@ class KafkaApis(val requestChannel: RequestChannel,
             new SecurityDisabledException("No Authorizer is configured on the broker.")))
       case Some(auth) =>
 
+        RequestToAuditLog.logRequest(deleteAclsRequest, request.context)
         val deleteResults = auth.deleteAcls(request.context, deleteAclsRequest.filters)
           .asScala.map(_.toCompletableFuture).toList
 
@@ -2312,6 +2315,7 @@ class KafkaApis(val requestChannel: RequestChannel,
         case rt => throw new InvalidRequestException(s"Unexpected resource type $rt")
       }
     }
+    RequestToAuditLog.logRequest(alterConfigsRequest, request.context)
     val authorizedResult = adminManager.alterConfigs(authorizedResources, alterConfigsRequest.validateOnly)
     val unauthorizedResult = unauthorizedResources.keys.map { resource =>
       resource -> configsAuthorizationApiError(resource)
@@ -2453,6 +2457,7 @@ class KafkaApis(val requestChannel: RequestChannel,
         case rt => throw new InvalidRequestException(s"Unexpected resource type $rt for resource ${resource.name}")
       }
     }
+    RequestToAuditLog.logRequest(describeConfigsRequest, request.context)
     val authorizedConfigs = adminManager.describeConfigs(authorizedResources.map { resource =>
       resource -> Option(describeConfigsRequest.configNames(resource)).map(_.asScala.toSet)
     }.toMap, describeConfigsRequest.includeSynonyms)

@@ -99,45 +99,47 @@ object AuditEventExtractor {
 
 object AuditEventExtractorSyntax {
 
+  sealed trait ExtractorSyntax[T] {
+    def extractAuditEventPayload(implicit extractor: AuditEventExtractor[T]): String
+  }
 
-
-  implicit class CreateAclsRequestAuditEventExtractorSyntax(val request: CreateAclsRequest) {
+  implicit class CreateAclsRequestAuditEventExtractorSyntax(val request: CreateAclsRequest) extends ExtractorSyntax[CreateAclsRequest] {
     def extractAuditEventPayload(implicit extractor: AuditEventExtractor[CreateAclsRequest]): String = {
       extractor.extractStringRepr(request)
     }
   }
 
-  implicit class DeleteAclsRequestAuditEventExtractorSyntax(val request: DeleteAclsRequest) {
+  implicit class DeleteAclsRequestAuditEventExtractorSyntax(val request: DeleteAclsRequest) extends ExtractorSyntax[DeleteAclsRequest] {
     def extractAuditEventPayload(implicit extractor: AuditEventExtractor[DeleteAclsRequest]): String = {
       extractor.extractStringRepr(request)
     }
   }
 
-  implicit class DescribeAclsRequestAuditEventExtractorSyntax(val request: DescribeAclsRequest) {
+  implicit class DescribeAclsRequestAuditEventExtractorSyntax(val request: DescribeAclsRequest) extends ExtractorSyntax[DescribeAclsRequest] {
     def extractAuditEventPayload(implicit extractor: AuditEventExtractor[DescribeAclsRequest]): String = {
       extractor.extractStringRepr(request)
     }
   }
 
-  implicit class AlterConfigsRequestAuditEventExtractorSyntax(val request: AlterConfigsRequest) {
+  implicit class AlterConfigsRequestAuditEventExtractorSyntax(val request: AlterConfigsRequest) extends ExtractorSyntax[AlterConfigsRequest] {
     def extractAuditEventPayload(implicit extractor: AuditEventExtractor[AlterConfigsRequest]): String = {
       extractor.extractStringRepr(request)
     }
   }
 
-  implicit class DescribeConfigsRequestAuditEventExtractorSyntax(val request: DescribeConfigsRequest) {
+  implicit class DescribeConfigsRequestAuditEventExtractorSyntax(val request: DescribeConfigsRequest) extends ExtractorSyntax[DescribeConfigsRequest] {
     def extractAuditEventPayload(implicit extractor: AuditEventExtractor[DescribeConfigsRequest]): String = {
       extractor.extractStringRepr(request)
     }
   }
 
-  implicit class CreateTopicsRequestAuditEventExtractorSyntax(val request: CreateTopicsRequest) {
+  implicit class CreateTopicsRequestAuditEventExtractorSyntax(val request: CreateTopicsRequest) extends ExtractorSyntax[CreateTopicsRequest] {
     def extractAuditEventPayload(implicit extractor: AuditEventExtractor[CreateTopicsRequest]): String = {
       extractor.extractStringRepr(request)
     }
   }
 
-  implicit class DeleteTopicsRequestAuditEventExtractorSyntax(val request: DeleteTopicsRequest) {
+  implicit class DeleteTopicsRequestAuditEventExtractorSyntax(val request: DeleteTopicsRequest) extends ExtractorSyntax[DeleteTopicsRequest] {
     def extractAuditEventPayload(implicit extractor: AuditEventExtractor[DeleteTopicsRequest]): String = {
       extractor.extractStringRepr(request)
     }
